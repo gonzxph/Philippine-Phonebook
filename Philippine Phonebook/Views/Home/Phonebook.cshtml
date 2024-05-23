@@ -1,0 +1,155 @@
+﻿﻿@using System.Web;
+@using System.Web.Mvc;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.IO;
+@using System.Drawing;
+@using System.Drawing.Imaging;
+@using System.Web.Services;
+<html>
+<head>
+    <title>Philippine Phonebook</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <h2>Philippine Phonebook</h2>
+    <div class="text-end">
+        <button type="button" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addPhonebookModal">
+            Add Product
+        </button>
+    </div>
+    <div class="float-end">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="search" placeholder="Search..." aria-label="Search" aria-describedby="button-search">
+            <button class="btn btn-outline-secondary" type="button" id="btnsearch">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    @{
+        string connstr = @"Data Source=gonzxph\MSSQLSERVER04;Initial Catalog=Phonebook;Integrated Security=True";
+        using (var db = new SqlConnection(connstr))
+        {
+            db.Open();
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "SELECT * FROM PHONEBOOK";
+                using (var reader = cmd.ExecuteReader())
+                {
+
+
+                <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th width="10%">Name</th>
+                                <th width="10%">Area Code</th>
+                                <th width="10%">Phone Number</th>
+                                <th width="10%">Mobile Number</th>
+                                <th width="10%">House Number</th>
+                                <th width="10%">Stree</th>
+                                <th width="5%">City</th>
+                                <th width="5%">Province</th>
+                                <th width="10%">Zip Code</th>
+                                <th width="5%">Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @while (reader.Read()) 
+                            { 
+                                <tr>
+                                    <td>@reader["NAME"]</td>
+                                    <td>@reader["AREA_CODE"]</td>
+                                    <td>@reader["PHONE_NUMBER"]</td>
+                                    <td>@reader["MOBILE_NUMBER"]</td>
+                                    <td>@reader["HOUSE_NUMBER"]</td>
+                                    <td>@reader["STREET"]</td>
+                                    <td>@reader["CITY"]</td>
+                                    <td>@reader["PROVINCE"]</td>
+                                    <td>@reader["ZIP_CODE"]</td>
+                                    <td>@reader["EMAIL"]</td>
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                }
+            }
+        }
+    }
+
+    <!--Add phonebook-->
+    <div class="modal fade" id="addPhonebookModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Add Product</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="form-container">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" name="name" placeholder="" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="descript">Area Code</label>
+                                        <input class="form-control" type="number" id="area_code" name="area_code"></input>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="isbn">Phone number</label>
+                                        <input type="number" maxlength="7" class="form-control" id="phoneno" name="phoneno">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="weight">Mobile number</label>
+                                        <input type="number" maxlength="8" class="form-control" id="mobileno" name="mobileno">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="weight">House number</label>
+                                        <input type="number" maxlength="8" class="form-control" id="houseno" name="houseno">
+                                    </div>
+                                    
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label for="price">Street</label>
+                                        <input class="form-control" type="text" id="street" name="street" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pub">City</label>
+                                        <input type="text" class="form-control" id="city" name="city">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="page">Province</label>
+                                        <input type="text" class="form-control" id="province" name="province">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="demin">Zip Code</label>
+                                        <input type="text" class="form-control" id="zcode" name="zcode">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stock">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnClose" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnAddPhonebook">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="~/Scripts/jQuery/jquery-3.7.1.min.js"></script>
+<script src="~/Scripts/js/addphonebook.js"></script>
+</html>
