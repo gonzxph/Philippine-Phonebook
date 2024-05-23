@@ -2,9 +2,9 @@
     $('#btnSearch').click(function () {
         var searchQuery = $('#searchQuery').val();
         if (searchQuery !== '') {
-            window.location.href = '@Url.Action("Index", "Home")?searchQuery=' + searchQuery;
+            window.location.href = '?searchQuery=' + searchQuery;
         } else {
-            window.location.href = '@Url.Action("Index", "Home")';
+            window.location.href = '/Home/Phonebook';
         }
     });
 });

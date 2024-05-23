@@ -1,4 +1,4 @@
-﻿﻿@using System.Web;
+﻿@using System.Web;
 @using System.Web.Mvc;
 @using System.Data;
 @using System.Data.SqlClient;
@@ -6,6 +6,7 @@
 @using System.Drawing;
 @using System.Drawing.Imaging;
 @using System.Web.Services;
+
 <html>
 <head>
     <title>Philippine Phonebook</title>
@@ -20,14 +21,15 @@
     </div>
     <div class="float-end">
         <div class="input-group mb-3">
-            <input type="text" class="form-control" id="search" placeholder="Search..." aria-label="Search" aria-describedby="button-search">
-            <button class="btn btn-outline-secondary" type="button" id="btnsearch">
+            <input type="text" class="form-control" id="searchQuery" placeholder="Search by phone number" aria-label="Search">
+            <button class="btn btn-outline-secondary" type="button" id="btnSearch">
                 <i class="fa fa-search"></i>
             </button>
         </div>
     </div>
 
     @{
+        string searchQuery = Request.QueryString["searchQuery"];
         string connstr = @"Data Source=gonzxph\MSSQLSERVER04;Initial Catalog=Phonebook;Integrated Security=True";
         using (var db = new SqlConnection(connstr))
         {
@@ -35,12 +37,20 @@
             using (var cmd = db.CreateCommand())
             {
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "SELECT * FROM PHONEBOOK";
+
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    cmd.CommandText = "SELECT * FROM PHONEBOOK WHERE PHONE_NUMBER LIKE @searchQuery";
+                    cmd.Parameters.AddWithValue("@searchQuery", "%" + searchQuery + "%");
+                }
+                else
+                {
+                    cmd.CommandText = "SELECT * FROM PHONEBOOK";
+                }
+
                 using (var reader = cmd.ExecuteReader())
                 {
-
-
-                <table class="table table-bordered">
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th width="10%">Name</th>
@@ -48,7 +58,7 @@
                                 <th width="10%">Phone Number</th>
                                 <th width="10%">Mobile Number</th>
                                 <th width="10%">House Number</th>
-                                <th width="10%">Stree</th>
+                                <th width="10%">Street</th>
                                 <th width="5%">City</th>
                                 <th width="5%">Province</th>
                                 <th width="10%">Zip Code</th>
@@ -56,8 +66,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @while (reader.Read()) 
-                            { 
+                            @while (reader.Read())
+                            {
                                 <tr>
                                     <td>@reader["NAME"]</td>
                                     <td>@reader["AREA_CODE"]</td>
@@ -70,7 +80,6 @@
                                     <td>@reader["ZIP_CODE"]</td>
                                     <td>@reader["EMAIL"]</td>
                                 </tr>
-
                             }
                         </tbody>
                     </table>
@@ -112,7 +121,7 @@
                                         <label for="weight">House number</label>
                                         <input type="number" maxlength="8" class="form-control" id="houseno" name="houseno">
                                     </div>
-                                    
+
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
@@ -149,7 +158,8 @@
         </div>
     </div>
 
+    <script src="~/Scripts/jQuery/jquery-3.7.1.min.js"></script>
+    <script src="~/Scripts/js/addphonebook.js"></script>
+    <script src="~/Scripts/js/searchphonebook.js"></script>
 </body>
-<script src="~/Scripts/jQuery/jquery-3.7.1.min.js"></script>
-<script src="~/Scripts/js/addphonebook.js"></script>
 </html>
