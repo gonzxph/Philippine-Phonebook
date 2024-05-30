@@ -12,6 +12,7 @@
         formData.append('province', $('#province').val())
         formData.append('zip_code', $('#zcode').val())
         formData.append('email', $('#email').val())
+        formData.append('status', $('#status').val())
 
         $.ajax({
             url: '../Home/AddPhonebook',
@@ -21,6 +22,8 @@
             contentType: false,
             success: function (phonebook) {
                 alert('Phonebook Successfully Created')
+                $('#addPhonebookModal').modal('hide');
+                location.reload();
             },
             error: function(){
                 alert('Error!')

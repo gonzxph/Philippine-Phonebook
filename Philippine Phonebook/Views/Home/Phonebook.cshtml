@@ -11,6 +11,11 @@
 <head>
     <title>Philippine Phonebook</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .hidden-column{
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <h2>Philippine Phonebook</h2>
@@ -21,7 +26,7 @@
     </div>
     <div class="float-end">
         <div class="input-group mb-3">
-            <input type="text" class="form-control" id="searchQuery" placeholder="Search by phone number" aria-label="Search">
+            <input type="number" class="form-control" id="searchQuery" placeholder="Search by phone number" aria-label="Search">
             <button class="btn btn-outline-secondary" type="button" id="btnSearch">
                 <i class="fa fa-search"></i>
             </button>
@@ -40,12 +45,12 @@
 
                 if (!string.IsNullOrEmpty(searchQuery))
                 {
-                    cmd.CommandText = "SELECT * FROM PHONEBOOK WHERE PHONE_NUMBER LIKE @searchQuery";
-                    cmd.Parameters.AddWithValue("@searchQuery", "%" + searchQuery + "%");
+                    cmd.CommandText = "SELECT * FROM PHONEBOOK WHERE PHONE_NUMBER = @searchQuery";
+                    cmd.Parameters.AddWithValue("@searchQuery", searchQuery);
                 }
                 else
                 {
-                    cmd.CommandText = "SELECT * FROM PHONEBOOK";
+                    cmd.CommandText = "SELECT * FROM PHONEBOOK WHERE STATUS = 'Active'";
                 }
 
                 using (var reader = cmd.ExecuteReader())
@@ -53,6 +58,7 @@
                     <table class="table table-bordered table-hover ">
                         <thead>
                             <tr>
+                                <th width="10%" class="hidden-column">ID</th>
                                 <th width="10%">Name</th>
                                 <th width="10%">Area Code</th>
                                 <th width="10%">Phone Number</th>
@@ -63,12 +69,14 @@
                                 <th width="5%">Province</th>
                                 <th width="10%">Zip Code</th>
                                 <th width="5%">Email</th>
+                                <th width="5%">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             @while (reader.Read())
                             {
                                 <tr>
+                                    <td class="prod-id hidden-column">@reader["ID"]</td>
                                     <td>@reader["NAME"]</td>
                                     <td>@reader["AREA_CODE"]</td>
                                     <td>@reader["PHONE_NUMBER"]</td>
@@ -79,6 +87,9 @@
                                     <td>@reader["PROVINCE"]</td>
                                     <td>@reader["ZIP_CODE"]</td>
                                     <td>@reader["EMAIL"]</td>
+                                    <td>@reader["STATUS"]</td>
+                                    <td><button type="button" class="btn btn-primary btn-up" data-bs-toggle="modal" data-bs-target="#updateModal">Update</button></td>
+                                    <td><button class="btn btn-danger btn-del" id="btnDel" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button></td>
                                 </tr>
                             }
                         </tbody>
@@ -93,7 +104,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Add Product</h1>
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Add Phonebook</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -107,19 +118,26 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="descript">Area Code</label>
-                                        <input class="form-control" type="number" id="area_code" name="area_code"></input>
+                                        <input class="form-control" type="text" id="area_code" name="area_code" maxlength="3">
                                     </div>
                                     <div class="form-group">
                                         <label for="isbn">Phone number</label>
-                                        <input type="number" maxlength="7" class="form-control" id="phoneno" name="phoneno">
+                                        <input type="text" maxlength="7" class="form-control" id="phoneno" name="phoneno">
                                     </div>
                                     <div class="form-group">
                                         <label for="weight">Mobile number</label>
-                                        <input type="number" maxlength="8" class="form-control" id="mobileno" name="mobileno">
+                                        <input type="text" maxlength="8" class="form-control" id="mobileno" name="mobileno">
                                     </div>
                                     <div class="form-group">
                                         <label for="weight">House number</label>
-                                        <input type="number" maxlength="8" class="form-control" id="houseno" name="houseno">
+                                        <input type="text" maxlength="8" class="form-control" id="houseno" name="houseno">
+                                    </div>
+                                    <br />
+                                    <div class="form-group">
+                                        <select class="form-select" id="status" aria-label="Default select example">
+                                            <option value="Active" selected>Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                        </select>
                                     </div>
 
                                 </div>
@@ -138,7 +156,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="demin">Zip Code</label>
-                                        <input type="text" class="form-control" id="zcode" name="zcode">
+                                        <input type="text" class="form-control" id="zcode" name="zcode" maxlength="20">
                                     </div>
                                     <div class="form-group">
                                         <label for="stock">Email</label>
@@ -158,8 +176,89 @@
         </div>
     </div>
 
+    <!-- Update Modal -->
+    <div class="modal fade" id="updateModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Phonebook Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-container">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group hidden-column">
+                                    <label for="name">ID</label>
+                                    <input type="text" class="form-control" id="upid" name="id" placeholder="" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="name">Name</label>
+                                    <input type="text" class="form-control" id="upname" name="name" placeholder="" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="descript">Area Code</label>
+                                    <input class="form-control" type="text" id="uparea_code" name="area_code" maxlength="3">
+                                </div>
+                                <div class="form-group">
+                                    <label for="isbn">Phone number</label>
+                                    <input type="text" maxlength="7" class="form-control" id="upphoneno" name="phoneno">
+                                </div>
+                                <div class="form-group">
+                                    <label for="weight">Mobile number</label>
+                                    <input type="text" maxlength="11" class="form-control" id="upmobileno" name="mobileno">
+                                </div>
+                                <div class="form-group">
+                                    <label for="weight">House number</label>
+                                    <input type="text" maxlength="8" class="form-control" id="uphouseno" name="houseno">
+                                </div>
+                                <br />
+                                <div class="form-group">
+                                    <select class="form-select" id="upstatus" aria-label="Default select example">
+                                        <option value="Active" selected>Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="price">Street</label>
+                                    <input class="form-control" type="text" id="upstreet" name="street" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="pub">City</label>
+                                    <input type="text" class="form-control" id="upcity" name="city">
+                                </div>
+                                <div class="form-group">
+                                    <label for="page">Province</label>
+                                    <input type="text" class="form-control" id="upprovince" name="province">
+                                </div>
+                                <div class="form-group">
+                                    <label for="demin">Zip Code</label>
+                                    <input type="text" class="form-control" id="upzcode" name="zcode" maxlength="20">
+                                </div>
+                                <div class="form-group">
+                                    <label for="stock">Email</label>
+                                    <input type="email" class="form-control" id="upemail" name="email">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnUpdate">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/Scripts/jQuery/jquery-3.7.1.min.js"></script>
     <script src="~/Scripts/js/addphonebook.js"></script>
     <script src="~/Scripts/js/searchphonebook.js"></script>
+    <script src="~/Scripts/js/updatephonebook.js"></script>
+    <script src="~/Scripts/js/deletephonebook.js"></script>
 </body>
 </html>
